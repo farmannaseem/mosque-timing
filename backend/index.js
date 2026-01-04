@@ -1,104 +1,77 @@
-const express = require('express');
-const admin = require('firebase-admin');
-const { Expo } = require('expo-server-sdk');
-const cors = require('cors');
 require('dotenv').config();
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const connectDB = require('./utils/database');
+const logger = require('./utils/logger');
+const errorHandler = require('./middleware/errorHandler');
+const notificationService = require('./services/notificationService');
+
+// Import routes
+const authRoutes = require('./routes/auth');
+const mosqueRoutes = require('./routes/mosques');
+const notificationRoutes = require('./routes/notifications');
+const userRoutes = require('./routes/users');
 
 const app = express();
-app.use(express.json());
-app.use(cors());
 
-// Initialize Firebase Admin
-// In production (Render), we will use environment variables
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    : require('./service-account.json');
+// ...
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/mosques', mosqueRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/users', userRoutes);
 
-const db = admin.firestore();
-const expo = new Expo();
-
-// API Endpoint to Update Timings
-app.post('/api/update-timings', async (req, res) => {
-    try {
-        const { mosqueId, timings, idToken } = req.body;
-
-        if (!mosqueId || !timings || !idToken) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        // Verify the user is authenticated
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const uid = decodedToken.uid;
-
-        // Get the mosque to verify ownership
-        const mosqueRef = db.collection('mosques').doc(mosqueId);
-        const mosqueDoc = await mosqueRef.get();
-
-        if (!mosqueDoc.exists) {
-            return res.status(404).json({ error: 'Mosque not found' });
-        }
-
-        const mosqueData = mosqueDoc.data();
-
-        // Verify that the requester is the owner of the mosque
-        if (mosqueData.imamId !== uid) {
-            return res.status(403).json({ error: 'Unauthorized: You do not own this mosque' });
-        }
-
-        // Update Firestore
-        await mosqueRef.update({
-            timings: timings,
-            lastUpdated: new Date().toISOString()
-        });
-
-        // Send Notifications
-        await sendNotifications(mosqueId, mosqueData.name);
-
-        res.status(200).json({ success: true, message: 'Timings updated and notifications sent' });
-
-    } catch (error) {
-        console.error('Error updating timings:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-async function sendNotifications(mosqueId, mosqueName) {
-    const tokensSnapshot = await db.collection(`mosques/${mosqueId}/tokens`).get();
-
-    if (tokensSnapshot.empty) {
-        console.log('No tokens found for mosque:', mosqueId);
-        return;
-    }
-
-    let messages = [];
-    tokensSnapshot.forEach((doc) => {
-        const token = doc.data().token;
-        if (Expo.isExpoPushToken(token)) {
-            messages.push({
-                to: token,
-                sound: 'default',
-                title: 'Prayer Timings Updated! 🕌',
-                body: `Assalamualaikum! The prayer timings for ${mosqueName} have been updated.`,
-                data: { mosqueId: mosqueId },
-            });
+// Root endpoint
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Mosque Timing API',
+        version: '2.0.0',
+        endpoints: {
+            health: '/health',
+            auth: '/api/auth',
+            mosques: '/api/mosques',
+            notifications: '/api/notifications'
         }
     });
-
-    let chunks = expo.chunkPushNotifications(messages);
-    for (let chunk of chunks) {
-        try {
-            await expo.sendPushNotificationsAsync(chunk);
-        } catch (error) {
-            console.error(error);
-        }
-    }
-}
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        error: 'Endpoint not found',
+        path: req.path
+    });
+});
+
+// Error handler (must be last)
+app.use(errorHandler);
+
+// Cleanup job - runs every 24 hours
+setInterval(() => {
+    logger.info('Running cleanup job for invalid tokens');
+    notificationService.cleanupInvalidTokens()
+        .catch(err => logger.error('Cleanup job failed:', err));
+}, 24 * 60 * 60 * 1000);
+
+// Start server
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`, {
+        environment: process.env.NODE_ENV || 'development',
+        nodeVersion: process.version
+    });
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        logger.info('HTTP server closed');
+    });
+});
+
+module.exports = app;

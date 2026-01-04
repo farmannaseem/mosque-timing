@@ -1,10 +1,11 @@
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
-import { theme } from '../constants/theme';
-import { AppProvider } from '../contexts/AppContext';
+import { darkTheme, lightTheme } from '../constants/theme';
+import { AppProvider, useApp } from '../contexts/AppContext';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -15,6 +16,24 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
+
+function ThemedLayout() {
+  const { themeMode } = useApp();
+  const activeTheme = themeMode === 'dark' ? darkTheme : lightTheme;
+
+  return (
+    <PaperProvider theme={activeTheme} key={themeMode}>
+      <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} backgroundColor={activeTheme.colors.background} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: activeTheme.colors.background } }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="imam/index" />
+        <Stack.Screen name="imam/update-timing" />
+        <Stack.Screen name="user/index" />
+        <Stack.Screen name="user/mosque/[id]" />
+      </Stack>
+    </PaperProvider>
+  );
+}
 
 export default function RootLayout() {
   useEffect(() => {
@@ -36,15 +55,7 @@ export default function RootLayout() {
 
   return (
     <AppProvider>
-      <PaperProvider theme={theme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="imam/index" />
-          <Stack.Screen name="imam/update-timing" />
-          <Stack.Screen name="user/index" />
-          <Stack.Screen name="user/mosque/[id]" />
-        </Stack>
-      </PaperProvider>
+      <ThemedLayout />
     </AppProvider>
   );
 }

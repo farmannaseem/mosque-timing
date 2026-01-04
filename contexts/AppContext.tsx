@@ -1,10 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
-import { addDoc, collection, doc, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { API_URL } from '../config';
-import { auth, db } from '../firebaseConfig';
+import apiService from '../services/apiService';
 
 // Define types
 export type PrayerTimings = {
@@ -21,12 +19,17 @@ export type Mosque = {
     name: string;
     address: string;
     imamName: string;
-    imamId: string; // Link to Auth User ID
+    imamId: string;
     timings: PrayerTimings;
     lastUpdated: string;
 };
 
 type UserRole = 'imam' | 'user' | null;
+
+interface User {
+    uid: string;
+    email: string;
+}
 
 interface AppContextType {
     user: User | null;
@@ -39,6 +42,8 @@ interface AppContextType {
     updateTimings: (mosqueId: string, newTimings: PrayerTimings) => Promise<void>;
     selectMosqueForUser: (mosqueId: string) => void;
     logout: () => void;
+    themeMode: 'light' | 'dark';
+    toggleTheme: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -49,59 +54,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [mosques, setMosques] = useState<Mosque[]>([]);
     const [currentMosque, setCurrentMosque] = useState<Mosque | null>(null);
     const [selectedMosque, setSelectedMosque] = useState<Mosque | null>(null);
+    const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark'); // Default to dark mode for Islamic aesthetic
 
-    // Auth Listener
+    // Load data from AsyncStorage on mount
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            setUser(firebaseUser);
-            if (firebaseUser) {
-                setUserRole('imam');
-                // Find the mosque belonging to this Imam
-                const q = query(collection(db, "mosques")); // In real app, use where("imamId", "==", firebaseUser.uid)
-                // Since we don't have composite indexes set up yet, we'll filter client side for this demo or assume we fetch all
-                // Ideally: const q = query(collection(db, "mosques"), where("imamId", "==", firebaseUser.uid));
-            } else {
-                setUserRole(null);
-                setCurrentMosque(null);
-            }
-        });
-        return unsubscribe;
+        loadUserData();
+        loadMosquesData();
+        loadThemeData();
     }, []);
 
-    // Real-time listener for Mosques
+    // Update current mosque when user or mosques change
     useEffect(() => {
-        const q = query(collection(db, "mosques"), orderBy("lastUpdated", "desc"));
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const mosquesData: Mosque[] = [];
-            querySnapshot.forEach((doc) => {
-                mosquesData.push({ id: doc.id, ...doc.data() } as Mosque);
-            });
+        if (user && mosques.length > 0) {
+            const myMosque = mosques.find(m => m.imamId === user.uid);
+            if (myMosque) setCurrentMosque(myMosque);
+        }
+    }, [user, mosques]);
+
+    const loadUserData = async () => {
+        try {
+            const userData = await AsyncStorage.getItem('user');
+            const role = await AsyncStorage.getItem('userRole');
+            if (userData) {
+                setUser(JSON.parse(userData));
+                setUserRole(role as UserRole);
+            }
+        } catch (e) {
+            console.error('Error loading user data:', e);
+        }
+    };
+
+    const loadMosquesData = async () => {
+        try {
+            const mosquesData = await AsyncStorage.getItem('mosques');
+            if (mosquesData) {
+                setMosques(JSON.parse(mosquesData));
+            }
+        } catch (e) {
+            console.error('Error loading mosques data:', e);
+        }
+    };
+
+    const loadThemeData = async () => {
+        try {
+            const storedTheme = await AsyncStorage.getItem('themeMode');
+            if (storedTheme === 'dark' || storedTheme === 'light') {
+                setThemeMode(storedTheme);
+            } else {
+                // Default to dark mode for the stunning Islamic aesthetic
+                setThemeMode('dark');
+                await AsyncStorage.setItem('themeMode', 'dark');
+            }
+        } catch (e) {
+            console.error('Error loading theme data:', e);
+        }
+    };
+
+    const toggleTheme = async () => {
+        try {
+            const newTheme = themeMode === 'light' ? 'dark' : 'light';
+            setThemeMode(newTheme);
+            await AsyncStorage.setItem('themeMode', newTheme);
+        } catch (e) {
+            console.error('Error saving theme data:', e);
+        }
+    };
+
+    const saveMosquesData = async (mosquesData: Mosque[]) => {
+        try {
+            await AsyncStorage.setItem('mosques', JSON.stringify(mosquesData));
             setMosques(mosquesData);
-
-            // Update current mosque if logged in
-            if (user) {
-                const myMosque = mosquesData.find(m => m.imamId === user.uid);
-                if (myMosque) setCurrentMosque(myMosque);
-            }
-
-            // Update selected mosque
-            if (selectedMosque) {
-                const updatedSelected = mosquesData.find(m => m.id === selectedMosque.id);
-                if (updatedSelected) setSelectedMosque(updatedSelected);
-            }
-        });
-
-        return () => unsubscribe();
-    }, [user, selectedMosque?.id]);
+        } catch (e) {
+            console.error('Error saving mosques data:', e);
+        }
+    };
 
     const registerImam = async (email: string, pass: string, name: string, address: string, imamName: string) => {
         try {
-            // 1. Create Auth User
-            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-            const uid = userCredential.user.uid;
+            // Generate a unique ID
+            const uid = `imam_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const mosqueId = `mosque_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-            // 2. Create Mosque Document linked to UID
-            const newMosqueData = {
+            // Create user
+            const newUser: User = {
+                uid,
+                email
+            };
+
+            // Create mosque
+            const newMosque: Mosque = {
+                id: mosqueId,
                 name,
                 address,
                 imamName,
@@ -117,9 +159,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 lastUpdated: new Date().toISOString(),
             };
 
-            await addDoc(collection(db, "mosques"), newMosqueData);
+            // Save user data
+            await AsyncStorage.setItem('user', JSON.stringify(newUser));
+            await AsyncStorage.setItem('userRole', 'imam');
+            await AsyncStorage.setItem(`user_${email}`, JSON.stringify({ email, pass, uid }));
 
-            // State updates handled by listeners
+            // Save mosque data
+            const updatedMosques = [...mosques, newMosque];
+            await saveMosquesData(updatedMosques);
+
+            // Update state
+            setUser(newUser);
+            setUserRole('imam');
+            setCurrentMosque(newMosque);
+
         } catch (e: any) {
             console.error("Registration Error: ", e);
             throw new Error(e.message);
@@ -128,7 +181,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const loginImam = async (email: string, pass: string) => {
         try {
-            await signInWithEmailAndPassword(auth, email, pass);
+            // Retrieve stored user credentials
+            const storedUserData = await AsyncStorage.getItem(`user_${email}`);
+
+            if (!storedUserData) {
+                throw new Error('User not found. Please register first.');
+            }
+
+            const userData = JSON.parse(storedUserData);
+
+            if (userData.pass !== pass) {
+                throw new Error('Invalid password');
+            }
+
+            const user: User = {
+                uid: userData.uid,
+                email: userData.email
+            };
+
+            // Save current session
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+            await AsyncStorage.setItem('userRole', 'imam');
+
+            // Update state
+            setUser(user);
+            setUserRole('imam');
+
         } catch (e: any) {
             console.error("Login Error: ", e);
             throw new Error(e.message);
@@ -138,30 +216,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updateTimings = async (mosqueId: string, newTimings: PrayerTimings) => {
         try {
             if (!user) throw new Error("Not authenticated");
-            const token = await user.getIdToken();
 
-            const response = await fetch(`${API_URL}/api/update-timings`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    mosqueId,
-                    timings: newTimings,
-                    idToken: token
-                }),
+            // Find and update the mosque
+            const updatedMosques = mosques.map(mosque => {
+                if (mosque.id === mosqueId && mosque.imamId === user.uid) {
+                    return {
+                        ...mosque,
+                        timings: newTimings,
+                        lastUpdated: new Date().toISOString()
+                    };
+                }
+                return mosque;
             });
 
-            const data = await response.json();
+            // Save updated mosques
+            await saveMosquesData(updatedMosques);
 
-            if (!response.ok) {
-                throw new Error(data.error || "Failed to update timings");
+            // Update current mosque
+            const updatedCurrentMosque = updatedMosques.find(m => m.id === mosqueId);
+            if (updatedCurrentMosque) {
+                setCurrentMosque(updatedCurrentMosque);
             }
 
-            alert("Timings updated and users notified!");
+            alert("Timings updated successfully!");
 
         } catch (e: any) {
-            console.error("Error updating document: ", e);
+            console.error("Error updating timings: ", e);
             alert(e.message);
         }
     };
@@ -170,6 +250,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const mosque = mosques.find(m => m.id === mosqueId);
         if (mosque) {
             setSelectedMosque(mosque);
+            await AsyncStorage.setItem('selectedMosqueId', mosqueId);
             // Register for Push Notifications
             await registerForPushNotificationsAsync(mosqueId);
         }
@@ -177,7 +258,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const logout = async () => {
         try {
-            await signOut(auth);
+            await AsyncStorage.removeItem('user');
+            await AsyncStorage.removeItem('userRole');
+            setUser(null);
             setUserRole(null);
             setCurrentMosque(null);
         } catch (e) {
@@ -185,7 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
     };
 
-    const registerForPushNotificationsAsync = async (mosqueId: string) => {
+    const registerForPushNotificationsAsync = async (mosqueId?: string) => {
         if (Platform.OS === 'web') return;
 
         try {
@@ -196,24 +279,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 finalStatus = status;
             }
             if (finalStatus !== 'granted') {
-                alert('Failed to get push token for push notification!');
+                console.log('Failed to get push token for push notification!');
                 return;
             }
-            const token = (await Notifications.getExpoPushTokenAsync()).data;
 
-            // Save token to Firestore under the mosque's subcollection
-            // mosques/{mosqueId}/tokens/{tokenId}
-            const tokenRef = doc(db, "mosques", mosqueId, "tokens", token);
-            await setDoc(tokenRef, {
-                token: token,
-                createdAt: new Date().toISOString()
+            // Get the token
+            const tokenData = await Notifications.getExpoPushTokenAsync({
+                projectId: '4508a8de-156a-4623-a1b2-c1d5cd8191d0'
             });
+            const token = tokenData.data;
+
+            // Save token locally
+            await AsyncStorage.setItem('push_token', token);
+
+            // Send to backend
+            // We use the apiService to register the token
+            // If mosqueId is provided, we subscribe to that mosque
+            // If not, we just register the token (and backend syncs followed mosques)
+            const platform = Platform.OS;
+            await apiService.registerPushToken(token, mosqueId, platform);
 
             console.log("Subscribed to notifications with token:", token);
         } catch (e) {
             console.error("Error registering for push notifications:", e);
         }
     };
+
+    // Call this on mount to ensure device is registered
+    useEffect(() => {
+        registerForPushNotificationsAsync();
+    }, [user]); // Re-register when user changes to sync subscriptions
 
     return (
         <AppContext.Provider value={{
@@ -226,7 +321,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             loginImam,
             updateTimings,
             selectMosqueForUser,
-            logout
+            logout,
+            themeMode,
+            toggleTheme
         }}>
             {children}
         </AppContext.Provider>

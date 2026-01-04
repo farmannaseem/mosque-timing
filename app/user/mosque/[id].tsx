@@ -1,8 +1,12 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Appbar, Button, Card, Surface, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Icon, Text, useTheme } from 'react-native-paper';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { IslamicBackground } from '../../../components/IslamicBackground';
+import { PrayerTimesCard } from '../../../components/PrayerTimesCard';
 import { useApp } from '../../../contexts/AppContext';
 
 export default function MosqueDetailsScreen() {
@@ -10,55 +14,89 @@ export default function MosqueDetailsScreen() {
     const { mosques } = useApp();
     const theme = useTheme();
     const router = useRouter();
+    const isDark = theme.dark;
 
     const mosque = mosques.find(m => m.id === id);
 
     if (!mosque) {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>Mosque not found</Text>
-                <Button onPress={() => router.back()}>Go Back</Button>
-            </SafeAreaView>
+            <IslamicBackground>
+                <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: isDark ? '#FFFFFF' : '#000000', marginBottom: 20 }}>Mosque not found</Text>
+                    <Button onPress={() => router.back()} mode="outlined" textColor={isDark ? '#FFD700' : '#1A2F42'}>Go Back</Button>
+                </SafeAreaView>
+            </IslamicBackground>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-            <Appbar.Header>
-                <Appbar.BackAction onPress={() => router.back()} />
-                <Appbar.Content title={mosque.name} />
-            </Appbar.Header>
+        <IslamicBackground>
+            <SafeAreaView style={{ flex: 1 }}>
+                <Appbar.Header style={{ backgroundColor: 'transparent' }}>
+                    <Appbar.BackAction onPress={() => router.back()} color={isDark ? '#FFD700' : '#1A2F42'} />
+                    <Appbar.Content title={mosque.name} titleStyle={{ color: isDark ? '#FFD700' : '#1A2F42', fontWeight: 'bold' }} />
+                </Appbar.Header>
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <Card style={styles.mosqueCard}>
-                    <Card.Content>
-                        <Text variant="headlineSmall" style={{ color: theme.colors.primary }}>{mosque.name}</Text>
-                        <Text variant="bodyMedium" style={{ color: 'gray' }}>{mosque.address}</Text>
-                        <Text variant="labelLarge" style={{ marginTop: 5 }}>Imam: {mosque.imamName}</Text>
-                        <Text variant="labelSmall" style={{ marginTop: 10, color: theme.colors.secondary }}>
-                            Last Updated: {new Date(mosque.lastUpdated).toLocaleString()}
-                        </Text>
-                    </Card.Content>
-                </Card>
+                <ScrollView contentContainerStyle={styles.content}>
+                    {/* Mosque Info Card */}
+                    <Animated.View entering={FadeInDown.delay(300).springify()}>
+                        <LinearGradient
+                            colors={isDark ? ['rgba(26, 47, 66, 0.9)', 'rgba(13, 31, 45, 0.95)'] : ['#FFFFFF', '#F8FAFC']}
+                            style={[styles.mosqueCard, !isDark && styles.cardShadow]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                        >
+                            <View style={styles.mosqueHeader}>
+                                <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(26, 95, 122, 0.1)' }]}>
+                                    <Icon source="mosque" size={40} color={isDark ? '#FFD700' : '#1A5F7A'} />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text variant="headlineSmall" style={{ color: isDark ? '#FFD700' : '#1A5F7A', fontWeight: 'bold' }}>
+                                        {mosque.name}
+                                    </Text>
+                                    <View style={styles.infoRow}>
+                                        <Icon source="map-marker" size={16} color={theme.colors.onSurfaceVariant} />
+                                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4 }}>
+                                            {mosque.address}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.infoRow}>
+                                        <Icon source="account" size={16} color={theme.colors.onSurfaceVariant} />
+                                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4 }}>
+                                            Imam: {mosque.imamName}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </LinearGradient>
+                    </Animated.View>
 
-                <Text variant="titleMedium" style={{ marginTop: 20, marginBottom: 10, marginLeft: 5 }}>Prayer Timings</Text>
+                    {/* Prayer Times Card */}
+                    <Animated.View entering={FadeInDown.delay(500).springify()}>
+                        <PrayerTimesCard
+                            mosqueName={mosque.name}
+                            timings={mosque.timings}
+                            lastUpdated={mosque.lastUpdated}
+                        />
+                    </Animated.View>
 
-                <Surface style={styles.timingsCard}>
-                    {Object.entries(mosque.timings).map(([prayer, time]) => (
-                        <View key={prayer} style={styles.timingRow}>
-                            <Text variant="titleMedium" style={{ textTransform: 'capitalize' }}>{prayer}</Text>
-                            <Text variant="headlineSmall" style={{ color: theme.colors.secondary }}>{time}</Text>
-                        </View>
-                    ))}
-                </Surface>
-
-                <View style={styles.infoBox}>
-                    <Text variant="bodySmall" style={{ textAlign: 'center', color: 'gray' }}>
-                        You will receive notifications when timings are updated for this mosque.
-                    </Text>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                    {/* Notification Info */}
+                    <Animated.View entering={FadeInDown.delay(700).springify()}>
+                        <LinearGradient
+                            colors={isDark ? ['rgba(255, 215, 0, 0.1)', 'rgba(255, 215, 0, 0.05)'] : ['rgba(26, 95, 122, 0.1)', 'rgba(26, 95, 122, 0.05)']}
+                            style={styles.notificationCard}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                        >
+                            <Icon source="bell-ring" size={24} color={isDark ? '#FFD700' : '#1A5F7A'} />
+                            <Text variant="bodyMedium" style={{ flex: 1, marginLeft: 12, color: theme.colors.onSurface }}>
+                                You will receive notifications when prayer timings are updated for this mosque.
+                            </Text>
+                        </LinearGradient>
+                    </Animated.View>
+                </ScrollView>
+            </SafeAreaView>
+        </IslamicBackground>
     );
 }
 
@@ -68,24 +106,44 @@ const styles = StyleSheet.create({
     },
     mosqueCard: {
         marginBottom: 20,
-        backgroundColor: 'white',
+        borderRadius: 24,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 215, 0, 0.1)',
     },
-    timingsCard: {
-        padding: 15,
-        borderRadius: 16,
-        backgroundColor: 'white',
-        elevation: 2,
+    cardShadow: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+        elevation: 4,
+        borderColor: 'rgba(0,0,0,0.05)',
     },
-    timingRow: {
+    mosqueHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        alignItems: 'flex-start',
+        gap: 16,
     },
-    infoBox: {
-        marginTop: 30,
-        padding: 10,
-    }
+    iconBadge: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    notificationCard: {
+        padding: 20,
+        borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 215, 0, 0.1)',
+    },
 });
+

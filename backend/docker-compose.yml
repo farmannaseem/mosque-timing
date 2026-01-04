@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: mosque-timing-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: changeme
+      MONGO_INITDB_DATABASE: mosque-timing
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mosque-network
+
+  backend:
+    build: .
+    container_name: mosque-timing-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://admin:changeme@mongodb:27017/mosque-timing?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+      EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      LOG_LEVEL: info
+    depends_on:
+      - mongodb
+    networks:
+      - mosque-network
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  mongodb_data:
+
+networks:
+  mosque-network:
+    driver: bridge
