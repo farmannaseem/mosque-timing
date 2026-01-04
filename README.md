@@ -10,11 +10,6 @@ A premium, production-ready mobile application built with Expo and React Native 
 - **Smart Notifications**: Intelligent push notification system that alerts users only when their followed mosque updates timings.
 - **Mosque Following System**: Users can now search for and "follow" specific mosques to personalize their dashboard.
 
-## 📱 Screenshots
-
-| Home Screen | User Dashboard | Login |
-|:---:|:---:|:---:|
-| ![Home](screenshots/home.png) | ![Dashboard](screenshots/user_dashboard.png) | ![Login](screenshots/login.png) |
 
 ## ✨ Features
 
