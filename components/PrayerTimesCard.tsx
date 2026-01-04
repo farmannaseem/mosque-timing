@@ -48,17 +48,17 @@ export const PrayerTimesCard: React.FC<PrayerTimesCardProps> = ({
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={isDark ? ['rgba(26, 47, 66, 0.9)', 'rgba(13, 31, 45, 0.95)'] : ['#FFFFFF', '#F8FAFC']}
+                colors={isDark ? ['rgba(6, 78, 59, 0.9)', 'rgba(2, 44, 34, 0.95)'] : ['#FFFFFF', '#F0FDF4']}
                 style={[styles.gradient, !isDark && styles.cardShadow]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             >
                 {/* Header with Mosque Name */}
                 <View style={styles.header}>
-                    <MosqueDome color={isDark ? '#FFD700' : '#1A5F7A'} size={60} />
+                    <MosqueDome color={isDark ? '#FFD700' : '#047857'} size={60} />
                     <Text
                         variant="headlineSmall"
-                        style={[styles.mosqueName, { color: isDark ? '#FFD700' : '#1A5F7A' }]}
+                        style={[styles.mosqueName, { color: isDark ? '#FFD700' : '#047857' }]}
                     >
                         {mosqueName}
                     </Text>
@@ -77,13 +77,13 @@ export const PrayerTimesCard: React.FC<PrayerTimesCardProps> = ({
                             <View
                                 style={[
                                     styles.iconContainer,
-                                    { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(26, 95, 122, 0.1)' }
+                                    { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(16, 185, 129, 0.1)' }
                                 ]}
                             >
                                 <Icon
                                     source={prayerIcons[prayer] || 'clock-outline'}
                                     size={24}
-                                    color={isDark ? '#FFD700' : '#1A5F7A'}
+                                    color={isDark ? '#FFD700' : '#047857'}
                                 />
                             </View>
                             <Text
@@ -94,7 +94,7 @@ export const PrayerTimesCard: React.FC<PrayerTimesCardProps> = ({
                             </Text>
                             <Text
                                 variant="titleMedium"
-                                style={[styles.prayerTime, { color: isDark ? '#FFD700' : '#1A5F7A' }]}
+                                style={[styles.prayerTime, { color: isDark ? '#FFD700' : '#047857' }]}
                             >
                                 {time}
                             </Text>

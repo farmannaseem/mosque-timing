@@ -33,25 +33,25 @@ export default function MosqueDetailsScreen() {
         <IslamicBackground>
             <SafeAreaView style={{ flex: 1 }}>
                 <Appbar.Header style={{ backgroundColor: 'transparent' }}>
-                    <Appbar.BackAction onPress={() => router.back()} color={isDark ? '#FFD700' : '#1A2F42'} />
-                    <Appbar.Content title={mosque.name} titleStyle={{ color: isDark ? '#FFD700' : '#1A2F42', fontWeight: 'bold' }} />
+                    <Appbar.BackAction onPress={() => router.back()} color={isDark ? '#FFD700' : '#064E3B'} />
+                    <Appbar.Content title={mosque.name} titleStyle={{ color: isDark ? '#FFD700' : '#064E3B', fontWeight: 'bold' }} />
                 </Appbar.Header>
 
                 <ScrollView contentContainerStyle={styles.content}>
                     {/* Mosque Info Card */}
                     <Animated.View entering={FadeInDown.delay(300).springify()}>
                         <LinearGradient
-                            colors={isDark ? ['rgba(26, 47, 66, 0.9)', 'rgba(13, 31, 45, 0.95)'] : ['#FFFFFF', '#F8FAFC']}
+                            colors={isDark ? ['rgba(6, 78, 59, 0.9)', 'rgba(2, 44, 34, 0.95)'] : ['#FFFFFF', '#F0FDF4']}
                             style={[styles.mosqueCard, !isDark && styles.cardShadow]}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                         >
                             <View style={styles.mosqueHeader}>
-                                <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(26, 95, 122, 0.1)' }]}>
-                                    <Icon source="mosque" size={40} color={isDark ? '#FFD700' : '#1A5F7A'} />
+                                <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(16, 185, 129, 0.1)' }]}>
+                                    <Icon source="mosque" size={40} color={isDark ? '#FFD700' : '#047857'} />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text variant="headlineSmall" style={{ color: isDark ? '#FFD700' : '#1A5F7A', fontWeight: 'bold' }}>
+                                    <Text variant="headlineSmall" style={{ color: isDark ? '#FFD700' : '#047857', fontWeight: 'bold' }}>
                                         {mosque.name}
                                     </Text>
                                     <View style={styles.infoRow}>
@@ -83,12 +83,12 @@ export default function MosqueDetailsScreen() {
                     {/* Notification Info */}
                     <Animated.View entering={FadeInDown.delay(700).springify()}>
                         <LinearGradient
-                            colors={isDark ? ['rgba(255, 215, 0, 0.1)', 'rgba(255, 215, 0, 0.05)'] : ['rgba(26, 95, 122, 0.1)', 'rgba(26, 95, 122, 0.05)']}
+                            colors={isDark ? ['rgba(255, 215, 0, 0.1)', 'rgba(255, 215, 0, 0.05)'] : ['rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.05)']}
                             style={styles.notificationCard}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                         >
-                            <Icon source="bell-ring" size={24} color={isDark ? '#FFD700' : '#1A5F7A'} />
+                            <Icon source="bell-ring" size={24} color={isDark ? '#FFD700' : '#047857'} />
                             <Text variant="bodyMedium" style={{ flex: 1, marginLeft: 12, color: theme.colors.onSurface }}>
                                 You will receive notifications when prayer timings are updated for this mosque.
                             </Text>

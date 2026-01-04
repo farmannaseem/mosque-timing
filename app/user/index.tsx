@@ -33,17 +33,17 @@ export default function UserScreen() {
                 rippleColor="rgba(255, 215, 0, 0.1)"
             >
                 <LinearGradient
-                    colors={isDark ? ['rgba(26, 47, 66, 0.9)', 'rgba(13, 31, 45, 0.95)'] : ['#FFFFFF', '#F8FAFC']}
+                    colors={isDark ? ['rgba(6, 78, 59, 0.9)', 'rgba(2, 44, 34, 0.95)'] : ['#FFFFFF', '#F0FDF4']}
                     style={[styles.cardGradient, !isDark && styles.cardShadow]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                 >
                     <View style={styles.cardHeader}>
-                        <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(26, 95, 122, 0.1)' }]}>
-                            <Icon source="mosque" size={28} color={isDark ? '#FFD700' : '#1A5F7A'} />
+                        <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.15)' : 'rgba(16, 185, 129, 0.1)' }]}>
+                            <Icon source="mosque" size={28} color={isDark ? '#FFD700' : '#047857'} />
                         </View>
                         <View style={{ flex: 1 }}>
-                            <Text variant="titleMedium" style={{ color: isDark ? '#FFD700' : '#1A5F7A', fontWeight: 'bold' }}>
+                            <Text variant="titleMedium" style={{ color: isDark ? '#FFD700' : '#047857', fontWeight: 'bold' }}>
                                 {item.name}
                             </Text>
                             <View style={styles.infoRow}>
@@ -59,7 +59,7 @@ export default function UserScreen() {
                                 </Text>
                             </View>
                         </View>
-                        <Icon source="chevron-right" size={24} color={isDark ? '#FFD700' : '#1A5F7A'} />
+                        <Icon source="chevron-right" size={24} color={isDark ? '#FFD700' : '#047857'} />
                     </View>
                 </LinearGradient>
             </TouchableRipple>
@@ -70,8 +70,8 @@ export default function UserScreen() {
         <IslamicBackground>
             <SafeAreaView style={{ flex: 1 }}>
                 <Appbar.Header style={{ backgroundColor: 'transparent' }}>
-                    <Appbar.BackAction onPress={() => router.back()} color={isDark ? '#FFD700' : '#1A2F42'} />
-                    <Appbar.Content title="Find a Mosque" titleStyle={{ color: isDark ? '#FFD700' : '#1A2F42', fontWeight: 'bold' }} />
+                    <Appbar.BackAction onPress={() => router.back()} color={isDark ? '#FFD700' : '#064E3B'} />
+                    <Appbar.Content title="Find a Mosque" titleStyle={{ color: isDark ? '#FFD700' : '#064E3B', fontWeight: 'bold' }} />
                 </Appbar.Header>
 
                 <View style={styles.container}>
@@ -79,8 +79,8 @@ export default function UserScreen() {
                         placeholder="Search by name or location"
                         onChangeText={setSearchQuery}
                         value={searchQuery}
-                        style={[styles.searchBar, { backgroundColor: isDark ? 'rgba(26, 47, 66, 0.8)' : '#FFFFFF' }]}
-                        iconColor={isDark ? '#FFD700' : '#1A5F7A'}
+                        style={[styles.searchBar, { backgroundColor: isDark ? 'rgba(6, 78, 59, 0.8)' : '#FFFFFF' }]}
+                        iconColor={isDark ? '#FFD700' : '#047857'}
                         placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'}
                         inputStyle={{ color: isDark ? '#FFFFFF' : '#000000' }}
                     />

@@ -32,7 +32,7 @@ export default function LandingScreen() {
                         onPress={toggleTheme}
                         mode="contained"
                         containerColor={isDark ? "rgba(255, 215, 0, 0.15)" : "rgba(0, 0, 0, 0.05)"}
-                        iconColor={isDark ? "#FFD700" : "#1A2F42"}
+                        iconColor={isDark ? "#FFD700" : "#064E3B"}
                         size={24}
                     />
                 </View>
@@ -48,7 +48,7 @@ export default function LandingScreen() {
                     >
                         <View style={styles.mosqueIconContainer}>
                             <LinearGradient
-                                colors={isDark ? ['#FFD700', '#FFA000'] : ['#1A2F42', '#0A1929']}
+                                colors={isDark ? ['#FFD700', '#FFA000'] : ['#064E3B', '#022C22']}
                                 style={styles.mosqueIconBackground}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
@@ -57,7 +57,7 @@ export default function LandingScreen() {
                             </LinearGradient>
                         </View>
 
-                        <Text style={[styles.mainTitle, { color: isDark ? '#FFD700' : '#1A2F42' }]}>
+                        <Text style={[styles.mainTitle, { color: isDark ? '#FFD700' : '#064E3B' }]}>
                             Mosque Timing
                         </Text>
                         <Text style={[styles.subtitle, { color: isDark ? '#E2E8F0' : '#475569' }]}>
@@ -75,22 +75,22 @@ export default function LandingScreen() {
                                 rippleColor="rgba(255, 215, 0, 0.1)"
                             >
                                 <LinearGradient
-                                    colors={isDark ? ['rgba(26, 47, 66, 0.9)', 'rgba(13, 31, 45, 0.95)'] : ['#FFFFFF', '#F8FAFC']}
+                                    colors={isDark ? ['rgba(6, 78, 59, 0.9)', 'rgba(2, 44, 34, 0.95)'] : ['#FFFFFF', '#F0FDF4']}
                                     style={[styles.cardGradient, !isDark && styles.cardShadow]}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}
                                 >
                                     <View style={styles.cardContent}>
-                                        <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.1)' : 'rgba(26, 47, 66, 0.05)' }]}>
+                                        <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.1)' : 'rgba(6, 78, 59, 0.05)' }]}>
                                             <Text style={styles.cardEmoji}>👳</Text>
                                         </View>
                                         <View style={styles.cardTextContent}>
-                                            <Text style={[styles.cardTitle, { color: isDark ? '#FFD700' : '#1A2F42' }]}>For Imams</Text>
+                                            <Text style={[styles.cardTitle, { color: isDark ? '#FFD700' : '#064E3B' }]}>For Imams</Text>
                                             <Text style={[styles.cardDescription, { color: isDark ? '#94A3B8' : '#64748B' }]}>
                                                 Manage prayer times & notify community
                                             </Text>
                                         </View>
-                                        <IconButton icon="arrow-right" iconColor={isDark ? '#FFD700' : '#1A2F42'} size={24} />
+                                        <IconButton icon="arrow-right" iconColor={isDark ? '#FFD700' : '#064E3B'} size={24} />
                                     </View>
                                 </LinearGradient>
                             </TouchableRipple>
@@ -104,22 +104,22 @@ export default function LandingScreen() {
                                 rippleColor="rgba(255, 215, 0, 0.1)"
                             >
                                 <LinearGradient
-                                    colors={isDark ? ['rgba(26, 47, 66, 0.9)', 'rgba(13, 31, 45, 0.95)'] : ['#FFFFFF', '#F8FAFC']}
+                                    colors={isDark ? ['rgba(6, 78, 59, 0.9)', 'rgba(2, 44, 34, 0.95)'] : ['#FFFFFF', '#F0FDF4']}
                                     style={[styles.cardGradient, !isDark && styles.cardShadow]}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}
                                 >
                                     <View style={styles.cardContent}>
-                                        <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.1)' : 'rgba(26, 47, 66, 0.05)' }]}>
+                                        <View style={[styles.iconBadge, { backgroundColor: isDark ? 'rgba(255, 215, 0, 0.1)' : 'rgba(6, 78, 59, 0.05)' }]}>
                                             <Text style={styles.cardEmoji}>🤲</Text>
                                         </View>
                                         <View style={styles.cardTextContent}>
-                                            <Text style={[styles.cardTitle, { color: isDark ? '#FFD700' : '#1A2F42' }]}>For Users</Text>
+                                            <Text style={[styles.cardTitle, { color: isDark ? '#FFD700' : '#064E3B' }]}>For Users</Text>
                                             <Text style={[styles.cardDescription, { color: isDark ? '#94A3B8' : '#64748B' }]}>
                                                 Find mosques & get prayer updates
                                             </Text>
                                         </View>
-                                        <IconButton icon="arrow-right" iconColor={isDark ? '#FFD700' : '#1A2F42'} size={24} />
+                                        <IconButton icon="arrow-right" iconColor={isDark ? '#FFD700' : '#064E3B'} size={24} />
                                     </View>
                                 </LinearGradient>
                             </TouchableRipple>

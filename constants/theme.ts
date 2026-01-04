@@ -1,38 +1,47 @@
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
+// Premium Islamic Palette
 const lightColors = {
   ...MD3LightTheme.colors,
-  primary: '#1A5F7A', // Islamic Teal
-  secondary: '#0EA5E9', // Sky 500
-  tertiary: '#38BDF8', // Sky 400
-  background: '#F0F8FF', // Light Blue
+  primary: '#047857', // Emerald 700
+  secondary: '#10B981', // Emerald 500
+  tertiary: '#059669', // Emerald 600
+  background: '#F0FDF4', // Very light green/white
   surface: '#FFFFFF',
   error: '#EF4444',
   onPrimary: '#FFFFFF',
   onSecondary: '#FFFFFF',
-  onSurface: '#0F172A', // Slate 900
-  onSurfaceVariant: '#64748B',
+  onSurface: '#022C22', // Emerald 950 (Dark text)
+  onSurfaceVariant: '#334155', // Slate 700
+  elevation: {
+    level0: 'transparent',
+    level1: '#FFFFFF',
+    level2: '#F8FAFC',
+    level3: '#F1F5F9',
+    level4: '#E2E8F0',
+    level5: '#CBD5E1',
+  },
 };
 
 const darkColors = {
   ...MD3DarkTheme.colors,
-  primary: '#FFD700', // Islamic Gold
-  secondary: '#FFA500', // Orange Gold
-  tertiary: '#FFE55C', // Light Gold
-  background: '#0A1929', // Deep Navy Blue
-  surface: '#1A2F42', // Navy Blue
-  error: '#CF6679',
-  onPrimary: '#0A1929', // Dark text on gold
-  onSecondary: '#0A1929',
-  onSurface: '#F8FAFC', // Light text
-  onSurfaceVariant: '#94A3B8',
+  primary: '#FCD34D', // Amber 300 (Goldish)
+  secondary: '#34D399', // Emerald 400
+  tertiary: '#FBBF24', // Amber 400
+  background: '#022C22', // Deep Emerald Black
+  surface: '#064E3B', // Emerald 900
+  error: '#F87171',
+  onPrimary: '#022C22', // Dark text on gold
+  onSecondary: '#022C22',
+  onSurface: '#ECFDF5', // Light mint text
+  onSurfaceVariant: '#94A3B8', // Slate 400
   elevation: {
     level0: 'transparent',
-    level1: '#1A2F42', // Navy
-    level2: '#243B53', // Lighter Navy
-    level3: '#2E4A63',
-    level4: '#385573',
-    level5: '#426083',
+    level1: '#064E3B', // Emerald 900
+    level2: '#065F46', // Emerald 800
+    level3: '#047857',
+    level4: '#059669',
+    level5: '#10B981',
   },
 };
 
@@ -49,4 +58,3 @@ export const darkTheme = {
   roundness: 16,
   dark: true,
 };
-

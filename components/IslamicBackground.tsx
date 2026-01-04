@@ -15,10 +15,10 @@ export const IslamicBackground: React.FC<IslamicBackgroundProps> = ({ children }
 
     const isDark = theme.dark;
 
-    // Richer, deeper gradients
+    // Richer, deeper gradients matching the new Green/Gold theme
     const gradientColors: [string, string, string] = isDark
-        ? ['#0F172A', '#1E293B', '#0F172A'] // Slate 900 -> 800 -> 900 (Deep Blue/Grey)
-        : ['#F8FAFC', '#F1F5F9', '#E2E8F0']; // Slate 50 -> 100 -> 200 (Clean White/Grey)
+        ? ['#022C22', '#064E3B', '#065F46'] // Deep Emerald Black -> Emerald 900 -> Emerald 800
+        : ['#F0FDF4', '#ECFDF5', '#D1FAE5']; // Very Light Green/White -> Mint 50 -> Mint 100
 
     return (
         <View style={styles.container}>
